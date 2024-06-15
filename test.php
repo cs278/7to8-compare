@@ -24,3 +24,9 @@ debug_zval_dump($vars[0], $vars[1], $vars[2]);
 // dump($vars2);
 
 dump(new x() <=> new x());
+
+dump(SORT_REGULAR);
+dump(SORT_NUMERIC);
+dump(SORT_STRING);
+dump(SORT_LOCALE_STRING);
+dump(SORT_NATURAL);

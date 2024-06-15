@@ -46,3 +46,69 @@ function array_keys(array $array, $filterByValue = null, bool $strict = false)
 
     return $result;
 }
+
+function sort(&$array, int $flags = \SORT_REGULAR)
+{
+    if ($flags === \SORT_REGULAR) {
+        return \usort($array, static function ($a, $b): int {
+            return Comparator::compare($a, $b);
+        });
+    }
+
+    return \sort($array, $flags);
+}
+
+function rsort(&$array, int $flags = \SORT_REGULAR)
+{
+    if ($flags === \SORT_REGULAR) {
+        return \usort($array, static function ($a, $b): int {
+            return -Comparator::compare($a, $b);
+        });
+    }
+
+    return \rsort($array, $flags);
+}
+
+function ksort(&$array, int $flags = \SORT_REGULAR)
+{
+    if ($flags === \SORT_REGULAR) {
+        return \uksort($array, static function ($a, $b): int {
+            return Comparator::compare($a, $b);
+        });
+    }
+
+    return \ksort($array, $flags);
+}
+
+function krsort(&$array, int $flags = \SORT_REGULAR)
+{
+    if ($flags === \SORT_REGULAR) {
+        return \uksort($array, static function ($a, $b): int {
+            return -Comparator::compare($a, $b);
+        });
+    }
+
+    return \krsort($array, $flags);
+}
+
+function asort(&$array, int $flags = \SORT_REGULAR)
+{
+    if ($flags === \SORT_REGULAR) {
+        return \uasort($array, static function ($a, $b): int {
+            return Comparator::compare($a, $b);
+        });
+    }
+
+    return \asort($array, $flags);
+}
+
+function arsort(&$array, int $flags = \SORT_REGULAR)
+{
+    if ($flags === \SORT_REGULAR) {
+        return \uasort($array, static function ($a, $b): int {
+            return -Comparator::compare($a, $b);
+        });
+    }
+
+    return \arsort($array, $flags);
+}
