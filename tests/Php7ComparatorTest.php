@@ -34,7 +34,9 @@ final class Php7ComparatorTest extends TestCase
             return;
         }
 
-        self::assertSame($expected, $comparator->compare($a, $b));
+            \error_clear_last();
+            self::assertSame($expected, $comparator->compare($a, $b));
+            self::assertNull(error_get_last());
     }
 
 
