@@ -1,0 +1,97 @@
+--- orig.c	2024-06-12 23:48:40.640021251 +0100
++++ patched.c	2024-06-13 01:39:37.994439798 +0100
+@@ -20,6 +20,7 @@
+ 
+ #include <ctype.h>
+ 
++#include "php.h"
+ #include "zend.h"
+ #include "zend_operators.h"
+ #include "zend_variables.h"
+@@ -29,6 +30,11 @@
+ #include "zend_strtod.h"
+ #include "zend_exceptions.h"
+ #include "zend_closures.h"
++#include "zend_builtin_functions.h"
++
++#include <execinfo.h>
++#include <stdio.h>
++#include <stdlib.h>
+ 
+ #if ZEND_USE_TOLOWER_L
+ #include <locale.h>
+@@ -2022,8 +2028,74 @@
+ }
+ /* }}} */
+ 
++void
++print_trace (void)
++{
++  void *array[10];
++  char **strings;
++  int size, i;
++
++  size = backtrace (array, 10);
++  strings = backtrace_symbols (array, size);
++  if (strings != NULL)
++  {
++
++    printf ("Obtained %d stack frames.\n", size);
++    for (i = 0; i < size; i++)
++      printf ("%s\n", strings[i]);
++  }
++
++  free (strings);
++}
++
+ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
+ {
++	// zval function_name;
++	// zval my_retval;
++	// zval my_params[2];
++
++	// ZVAL_STRING(&function_name, "debug_print_backtrace");
++	// ZVAL_LONG(&my_params[0], DEBUG_BACKTRACE_IGNORE_ARGS);
++	// ZVAL_LONG(&my_params[1], 0);
++
++	// if (FAILURE == call_user_function(NULL, NULL, &function_name, &my_retval, 2, my_params)) {
++	// 	zval_ptr_dtor(&function_name);
++
++	// 	return FAILURE;
++	// }
++
++	// zval_ptr_dtor(&function_name);  
++
++	zval bt;
++	zend_long options = DEBUG_BACKTRACE_IGNORE_ARGS;
++	zend_long limit = 1;
++	zval *frame;
++
++	zend_fetch_debug_backtrace(&bt, 0, options, limit);
++
++	if ((frame = zend_hash_index_find_deref(Z_ARR(bt), 0)) != NULL) {
++		zval *function_name;
++
++		if ((function_name = zend_hash_str_find_deref(Z_ARR_P(frame), "function", sizeof("function") - 1)) != NULL) {
++			// printf("here\n");
++			// printf("here: %s\n", Z_STRVAL_P(function_name));
++
++			php_stream *stream;
++
++			stream = php_stream_open_wrapper("file:///tmp/comparisons.log", "ab", 0, NULL);
++
++			if (stream == NULL) {
++				return FAILURE;
++			}
++
++			php_stream_write(stream, Z_STRVAL_P(function_name), Z_STRLEN_P(function_name));
++			php_stream_write(stream, "\n", 1);
++			php_stream_close(stream);
++		}
++	}
++
++	zval_ptr_dtor(&bt);
++
+ 	int ret;
+ 	int converted = 0;
+ 	zval op1_copy, op2_copy;
